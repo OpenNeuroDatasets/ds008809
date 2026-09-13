@@ -1,0 +1,143 @@
+# ChineseInnerSpeech-HI: Dataset Description
+
+## 1. Dataset Overview
+
+`ChineseInnerSpeech-HI` is a visual and auditory Chinese inner-speech EEG dataset organized according to the BIDS directory structure. The root-level metadata declares:
+
+- `Name`: Visual and Audio Word-Phrase EEG Dataset;
+- `BIDSVersion`: 1.7.0;
+- `DatasetType`: raw;
+- Participants: `sub-01` through `sub-13`, 13 in total;
+- Each participant has two sessions: `ses-audio` and `ses-visual`;
+- Each session has 5 word-experiment runs (`acq-word`, run 01--05) and 1 phrase-experiment run (`acq-phrase`, run 06);
+- Each BrainVision recording is continuous EEG; example metadata specify 63 EEG channels, a 1000 Hz sampling rate, Brain Products equipment, and 50 Hz power-line frequency.
+
+The current directory check found 156 groups of BrainVision files (each group contains `.eeg`, `.vhdr`, and `.vmrk`), totaling 1226 files and approximately 40GB; the original `.eeg` binary files are approximately 40.44 GB in total. The `derivatives/` directory may currently be empty; it is the target location for preprocessing caches and model outputs.
+
+## 2. Dataset Availability Statement
+
+- The current source directory has complete BIDS root files, 13 participant directories, 26 session directories, and 156 word/phrase EEG acquisition records; each record can be read as a BrainVision three-file set.
+- Each acquisition record has been checked for accompanying `_eeg.json`, `_events.json`, `_events.tsv`, and `_channels.tsv` files; the session level has `scans.tsv`, and electrode coordinates have `electrodes.tsv` and `coordsystem.json`.
+- The data are suitable for use with MNE's BrainVision reader and this project's `code/processing.py` for preprocessing; preprocessing generates Epoch caches written to `derivatives/`.
+- The BIDS Validator was not run this time, and the 156 binary records were not loaded individually; therefore, “available” here is a statement about directory structure and file pairing, not a guarantee of signal quality or event quality for every record.
+- In `participants.tsv`, `age`, `sex`, `hand`, `weight`, and `height` are `n/a` for all 13 participants; demographic stratification cannot be performed on this basis.
+- The BIDS metadata do not define the gender meaning of the `S101--S120` and `S201--S220` event prefixes. Any gender-group analysis must check the original stimulus logs and record the mapping in the result configuration.
+- The current directory does not provide an explicit license, ethics approval text, or public redistribution terms. Before use, sharing, publication, or secondary development, authorization from the data provider should be obtained, and applicable ethics and privacy requirements should be followed.
+
+## 3. Complete Directory Layout
+
+After the code is placed in `code/`, the recommended dataset root directory is as follows:
+
+```text
+ChineseInnerSpeech-HI/
+├── dataset_description.json
+├── participants.json
+├── participants.tsv
+├── README.md                       Dataset description (this file can serve as a rewritten version)
+├── code/                           Top-level project code subdirectory
+│   ├── eegnet_training_common.py
+│   ├── processing.py
+│   ├── words_20class_train.py
+│   ├── words_half_full.py
+│   ├── words_gender.py
+│   ├── words_embeddings.py
+│   └── phrase_composition_map.csv
+├── sub-01/ ... sub-13/
+│   ├── ses-audio/
+│   │   ├── sub-XX_ses-audio_scans.tsv
+│   │   └── eeg/
+│   │       ├── *_task-audio_acq-word_run-01..05_eeg.eeg
+│   │       ├── *_task-audio_acq-word_run-01..05_eeg.vhdr
+│   │       ├── *_task-audio_acq-word_run-01..05_eeg.vmrk
+│   │       ├── *_task-audio_acq-word_run-01..05_eeg.json
+│   │       ├── *_task-audio_acq-word_run-01..05_events.tsv/json
+│   │       ├── *_task-audio_acq-word_run-01..05_channels.tsv
+│   │       ├── *_task-audio_acq-phrase_run-06_eeg.eeg/vhdr/vmrk/json
+│   │       ├── *_task-audio_acq-phrase_run-06_events.tsv/json
+│   │       ├── *_task-audio_acq-phrase_run-06_channels.tsv
+│   │       ├── *_acq-word_space-CapTrak_electrodes.tsv
+│   │       ├── *_acq-word_space-CapTrak_coordsystem.json
+│   │       ├── *_acq-phrase_space-CapTrak_electrodes.tsv
+│   │       └── *_acq-phrase_space-CapTrak_coordsystem.json
+│   └── ses-visual/                  Same structure as ses-audio, with visual as the task
+│       ├── sub-XX_ses-visual_scans.tsv
+│       └── eeg/ (the same word/phrase, BrainVision, and BIDS accompanying files)
+└── derivatives/                     Preprocessing, model, metric, and audit outputs
+```
+
+Here, `XX` is the two-digit participant number. The extension count in the actual source directory is: 156 `.eeg`, 156 `.vhdr`, 156 `.vmrk`, 156 `_eeg.json`, 156 `_events.json`, 156 `_events.tsv`, 156 `_channels.tsv`, 52 `electrodes.tsv`, 52 `coordsystem.json`, and 26 `scans.tsv`, plus root-level metadata files.
+
+## 4. Root-Level Metadata
+
+### `dataset_description.json`
+
+Records the dataset name, BIDS version, `raw` type, and metadata generated by MNE-BIDS. The open license is CCO
+
+### `participants.json` and `participants.tsv`
+
+Field definitions include:
+
+| Field | Meaning | Current value status |
+| --- | --- | --- |
+| `participant_id` | Participant identifier | `sub-01`--`sub-13` |
+| `age` | Age at testing, in years | All `n/a` |
+| `sex` | Biological sex, theoretical levels F/M | All `n/a` |
+| `hand` | Handedness, R/L/A | All `n/a` |
+
+## 5. Tasks and Events
+
+### Visual and Auditory Word Tasks
+
+`ses-visual` uses `task-visual`, and `ses-audio` uses `task-audio`. In each session, `run-01` through `run-05` are word tasks; by default, the code interprets the target labels as 20 word classes numbered 1--20.
+
+### Phrase Task
+
+`run-06` is the phrase acquisition; the event-label range is defined by the original event table. The composition experiment in the code uses `code/phrase_composition_map.csv` to map phrase labels 31--40 to two word labels:
+
+```csv
+label,text,word_labels
+31,吃饭,"11 8"
+32,拿药,"12 7"
+33,买水,"13 1"
+34,读书,"14 2"
+35,穿衣服,"15 9"
+36,大门,"16 3"
+37,新电话,"17 4"
+38,老朋友,"19 5"
+39,小杯,"18 6"
+40,年轻人,"20 10"
+```
+
+This CSV is an auxiliary label/text file for the composition experiment, not an original EEG acquisition file. The experiment in `words_embeddings.py` combines isolated-word EEG with phrase-text embeddings and should not be interpreted as “EEG recordings under real phrase stimulation”; real phrase EEG should be analyzed directly from the `acq-phrase_run-06` files.
+
+## 6. File Pairing for an Individual Record
+
+The core files for each acquisition run are:
+
+```text
+*_eeg.vhdr       BrainVision header file, entry point for reading
+*_eeg.vmrk       BrainVision event marker file
+*_eeg.eeg        BrainVision binary signal
+*_eeg.json       EEG acquisition parameters
+*_events.tsv     BIDS event table
+*_events.json    Event field definitions
+*_channels.tsv   Channel names, types, units, status, and sampling rate
+```
+
+Electrode spatial information is located in the session's `eeg/` directory, appearing as pairs of `electrodes.tsv` and `coordsystem.json`; the session acquisition inventory is in `*_scans.tsv`.
+
+## 7. Connection with the Code
+
+After placing the code in the root-level `code/` directory, preprocessing and training read by default from:
+
+```text
+sub-XX/ses-audio/eeg/
+sub-XX/ses-visual/eeg/
+```
+
+Default output is written to:
+
+```text
+derivatives/
+```
+Code link: https://anonymous.4open.science/r/EEGdata-0D84/
