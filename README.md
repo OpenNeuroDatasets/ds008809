@@ -5,7 +5,7 @@
 `ChineseInnerSpeech-HI` is a visual and auditory Chinese inner-speech EEG dataset organized according to the BIDS directory structure. The root-level metadata declares:
 
 - `Name`: Visual and Audio Word-Phrase EEG Dataset;
-- `BIDSVersion`: 1.7.0;
+- `BIDSVersion`: 1.0.0;
 - `DatasetType`: raw;
 - Participants: `sub-01` through `sub-13`, 13 in total;
 - Each participant has two sessions: `ses-audio` and `ses-visual`;
