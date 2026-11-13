@@ -1,0 +1,23 @@
+{
+    "Name": "ChineseInnerSpeech_HI",
+    "BIDSVersion": "1.7.0",
+    "DatasetType": "raw",
+    "Authors": [
+        "EEG study team"
+    ],
+    "Funding": [
+        "Masked for double-blind review"
+    ],
+    "EthicsApprovals": [
+        "Approved by the Institutional Review Board (masked for review)"
+    ],
+    "GeneratedBy": [
+        {
+            "Name": "MNE-BIDS",
+            "Version": "0.17.0",
+            "CodeURL": "https://mne.tools/mne-bids/"
+        }
+    ],
+    "DatasetDOI": "doi:10.18112/openneuro.ds008809.v1.0.1",
+    "License": "CC0"
+}
